@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Event Dashboard App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Times New Roman', Times, serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: url('https://postimage.me/images/2025/03/08/WhatsApp-Image-2025-03-08-at-10.22.52-PM.jpeg') no-repeat center center;
+      background-size: cover;
+    }
+
+    #app {
+      width: 95%;
+      max-width: 420px;
+      height: 97vh;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    input,
+    button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 6px;
+      font-size: 18px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .event-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .event {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      font-weight: bold;
+      font-size: 16px;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .event img {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+    }
+
+    .event small {
+      font-size: 14px;
+      color: Blck;
+      margin-top: 5px;
+    }
+
+    .logout-btn {
+      background-color: #ff4d4d;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background: white;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+      font-size: 16px;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+
+    <!-- Login Page -->
+    <div id="loginPage" class="page active">
+      <h2>Login</h2>
+      <input type="text" id="loginUsername" placeholder="Username">
+      <input type="password" id="loginPassword" placeholder="Password">
+      <button onclick="login()">Login</button>
+      <p>Don't have an account? <a onclick="showPage('registerPage')">Register</a></p>
+    </div>
+
+    <!-- Register Page -->
+    <div id="registerPage" class="page">
+      <h2>Register</h2>
+      <input type="text" id="registerUsername" placeholder="Username">
+      <input type="password" id="registerPassword" placeholder="Password">
+      <button onclick="register()">Register</button>
+      <p>Already have an account? <a onclick="showPage('loginPage')">Login</a></p>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div id="dashboardPage" class="page">
+      <h2>Welcome, <span id="usernameDisplay"></span></h2>
+      <div class="event-container" id="eventContainer"></div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Event Details Page -->
+    <div id="eventDetailsPage" class="page">
+      <h2>Event Details</h2>
+      <table>
+        <tr>
+          <th>Event</th>
+          <td id="eventName"></td>
+        </tr>
+        <tr>
+          <th>Date</th>
+          <td id="eventDate"></td>
+        </tr>
+        <tr>
+          <th>Hall</th>
+          <td id="eventHall"></td>
+        </tr>
+        <tr>
+          <th>Time</th>
+          <td id="eventTime"></td>
+        </tr>
+        <tr>
+          <th>Coordinator</th>
+          <td id="eventCoordinator"></td>
+        </tr>
+        <tr>
+          <th>Contact</th>
+          <td id="eventContact"></td>
+        </tr>
+      </table>
+      <button onclick="showPage('dashboardPage')">Back to Events</button>
+    </div>
+
+  </div>
+
+  <script>
+    function checkLogin() {
+      let userData = JSON.parse(localStorage.getItem("loggedInUser"));
+      if (userData && new Date().getTime() < userData.expiry) {
+        document.getElementById("usernameDisplay").innerText = userData.username;
+        showPage('dashboardPage');
+      } else {
+        logout();
+      }
+    }
+    checkLogin();
+
+    function showPage(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(page).classList.add('active');
+    }
+
+    function register() {
+      let user = document.getElementById("registerUsername").value;
+      let pass = document.getElementById("registerPassword").value;
+      if (user && pass) {
+        localStorage.setItem(user, pass);
+        alert("Registration Successful!");
+        showPage('loginPage');
+      } else {
+        alert("Please enter username & password!");
+      }
+    }
+
+    function login() {
+      let user = document.getElementById("loginUsername").value;
+      let pass = document.getElementById("loginPassword").value;
+      if (localStorage.getItem(user) === pass) {
+        let expiryDate = new Date().getTime() + (30 * 24 * 60 * 60 * 1000); // 1 Month
+        localStorage.setItem("loggedInUser", JSON.stringify({
+          username: user,
+          expiry: expiryDate
+        }));
+        document.getElementById("usernameDisplay").innerText = user;
+        showPage('dashboardPage');
+      } else {
+        alert("Invalid Credentials!");
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("loggedInUser");
+      showPage('loginPage');
+    }
+    // Events List
+    const events = [
+      ["Bridge Making", "https://postimage.me/images/2025/03/07/istockphoto-2029353335-612x612.jpg", "March 11", "Hall 108 & 109", "12:00 PM -05:00PM", "Kapil Vaidya", "9307098102", " "],
+      ["Blind Coding", "https://postimage.me/images/2025/03/07/Blind-Coding.jpg", "March 11", "Computer Lab HaLL 123", "12:00 PM -05:00PM", "Vaibhav Danve", "9420078054", " "],
+      ["Circuit Debugging", "https://postimage.me/images/2025/03/07/circuit-debugging.webp", "March 11", "Hall EX-208", "12:00 PM -05:00PM", "Akshay Paithane", "8767031998", " "],
+      ["Welding Battle", "https://postimage.me/images/2025/03/07/welding-battle.png", "March 11", "Engineering Workshop", "12:00 PM -05:00PM", "Abhijeet Bade", "7745866608", " "],
+      ["Tech Quiz", "https://postimage.me/images/2025/03/07/Tech-quiz.jpg", "March 11", "Hall 210", "12:00 PM -05:00PM", "Zaneta Pagadala", "7972964595", " "],
+      ["Robo Race", "https://postimage.me/images/2025/03/07/Robo-race.jpg", "March 11", "Old Workshop", "12:00 PM -05:00PM", "Bhushan Lahane", "7775831791", " "],
+      ["Business Blitz", "https://postimage.me/images/2025/03/07/Business-blitz.jpg", "March 11", "Hall 206", "12:00 PM-05:00 PM", "Rakshanda Chakre", "9284129645", "DAY 01"],
+      ["Business Blitz", "https://postimage.me/images/2025/03/07/Business-blitz.jpg", "March 12", "Hall 120", "10:00 AM-02:00 PM", "Rakshanda Chakre", "9284129645", "DAY 02"],
+      ["Debate Competition", "https://postimage.me/images/2025/03/07/Debate-competition.png", "March 11", "Hall 228", "12:00 PM -05:00PM", "Rohit Pawar", "8767443493", " "],
+      ["JAM(Just A Minute)", "https://postimage.me/images/2025/03/07/JAM.jpg", "March 11", "Hall 216", "12:00 PM -05:00PM", "Siddhi Shete", "9595161234", " "],
+      ["Project Competition", "https://postimage.me/images/2025/03/07/Project-competition.jpg", "March 11", "Polytechnic", "12:00 AM -05:00PM", "Sumit Joshi", "8767560849", " "],
+      ["E-Sports", "https://postimage.me/images/2025/03/07/E-Sport.jpg", "March 11 ", "Hall 118", "12:00 PM -05:00PM", "Shrikant Akolkar", "7558511431", " DAY 01"],
+      ["E-Sports", "https://postimage.me/images/2025/03/07/E-Sport.jpg", "March 12", "Hall 118", "10:00 AM-02:00PM", "Shrikant Akolkar", "7558511431", " DAY 02"]
+    ];
+    const eventContainer = document.getElementById('eventContainer');
+    events.forEach(event => {
+      const eventDiv = document.createElement('div');
+      eventDiv.classList.add('event');
+      eventDiv.innerHTML = `<img src="${event[1]}" alt="${event[0]}"><p>${event[0]}</p><small>${event[7]}</small>`;
+      eventDiv.onclick = () => showEventDetails(event);
+      eventContainer.appendChild(eventDiv);
+    });
+
+    function showEventDetails(event) {
+      document.getElementById("eventName").innerText = event[0];
+      document.getElementById("eventDate").innerText = event[2];
+      document.getElementById("eventHall").innerText = event[3];
+      document.getElementById("eventTime").innerText = event[4];
+      document.getElementById("eventCoordinator").innerText = event[5];
+      document.getElementById("eventContact").innerText = event[6];
+      showPage('eventDetailsPage');
+    }
+  </script>
+
+</body>
+
+</html>
